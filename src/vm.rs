@@ -230,6 +230,10 @@ impl VM {
         //return the data in the VM registers
         self.registers
     }
+
+    pub fn add_byte(&mut self, byte: u8) {
+        self.program.push(byte);
+    }
 }
 
 #[cfg(test)]

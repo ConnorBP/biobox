@@ -2,6 +2,7 @@ use crate::vm::VM;
 use std;
 use std::io;
 use std::io::Write;
+use std::num::ParseIntError;
 
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
@@ -26,6 +27,12 @@ impl REPL {
         println!(
             r#"
 ======BIOBOX Usage======
+    Execute VM Opcode:
+
+        Enter in a Hex String to execute opcodes directly on the vm
+        Example for a LOAD command: 01 01 03 E8
+        Example for add (add register 3 to register 1 and store in register 4): 02 01 03 04
+        
     Commands:
 
         .help | .usage : "shows this message"
@@ -106,11 +113,42 @@ impl REPL {
                                            //break;//break out of the execution loop to reach the natural end of the process
                 }
                 _ => {
-                    println!("Invalid input!");
-                    REPL::print_help();
+                    let results = self.parse_hex(buffer);
+                    match results {
+                        Ok(bytes) => {
+                            for byte in bytes {
+                                self.vm.add_byte(byte);
+                            }
+                            self.vm.run_once();
+                        }
+                        Err(_e) => {
+                            println!("Unable to decode hex string. Please enter 4 groups (separated by spaces) of 2 hex characters each.");
+                            REPL::print_help();
+                        }
+                    }
                 }
             }
         }
     }
 
+    /// Helper functions
+
+    /// Accepts a hexadecimal string WITHOUT a leading `0x` and returns a Vec of u8
+    /// Example for a LOAD command: 01 01 03 E8 or 01 0C 03 E8
+    fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError> {
+        let split = i.split(" ").collect::<Vec<&str>>();
+        let mut results: Vec<u8> = vec![];
+        for hex_string in split {
+            let byte = u8::from_str_radix(&hex_string, 16);
+            match byte {
+                Ok(result) => {
+                    results.push(result);
+                }
+                Err(e) => {
+                    return Err(e);
+                }
+            }
+        }
+        Ok(results)
+    }
 }
