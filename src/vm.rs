@@ -1,6 +1,7 @@
 use crate::instructions::Opcode;
 
 //this is the definition of our vm
+#[derive(Default)]
 pub struct VM {
     //the vm has 32bit wide registers
     registers: [i32; 32],
@@ -51,7 +52,7 @@ impl VM {
             },
             Opcode::LOAD => {
                 let register = self.next_8_bits() as usize; // cast to usize to use as index in the array
-                let number = self.next_16_bits() as u32;
+                let number = u32::from(self.next_16_bits());
                 self.registers[register] = number as i32; // the registers are i32s
             },
             Opcode::ADD => {//addition opcode. stores result in the register //TODO: Maybe an overflow attribute could be stored if an overflow is detected
@@ -116,7 +117,7 @@ impl VM {
     fn decode_opcode(&mut self)->Opcode {
         let opcode = Opcode::from(self.program[self.pc]);
         self.pc += 1;
-        return opcode;
+        opcode
     }
 
     //bit helpers
@@ -124,13 +125,13 @@ impl VM {
     fn next_8_bits(&mut self)->u8 {
         let result = self.program[self.pc];
         self.pc += 1;
-        return result;
+        result
     }
 
     fn next_16_bits(&mut self)->u16 {
-        let result = ((self.program[self.pc] as u16) << 8) | self.program[self.pc +1] as u16;
+        let result = (u16::from(self.program[self.pc]) << 8) | u16::from(self.program[self.pc +1]);
         self.pc += 2;
-        return result;
+        result
     }
 }
 

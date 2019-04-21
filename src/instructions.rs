@@ -19,16 +19,16 @@ pub enum Opcode {
 impl From<u8> for Opcode {
     fn from(v: u8)->Self {
         match v {
-            0 => return Opcode::HLT,
-            1 => return Opcode::LOAD,
-            2 => return Opcode::ADD,
-            3 => return Opcode::SUB,
-            4 => return Opcode::MUL,
-            5 => return Opcode::DIV,
-            6 => return Opcode::JMP,
-            7 => return Opcode::JMPF,
-            8 => return Opcode::JMPB,
-            _ => return Opcode::IGL
+            0 => Opcode::HLT,
+            1 => Opcode::LOAD,
+            2 => Opcode::ADD,
+            3 => Opcode::SUB,
+            4 => Opcode::MUL,
+            5 => Opcode::DIV,
+            6 => Opcode::JMP,
+            7 => Opcode::JMPF,
+            8 => Opcode::JMPB,
+            _ => Opcode::IGL
         }
     }
 }
@@ -42,7 +42,7 @@ pub struct Instruction {
 impl Instruction {
     pub fn new(opcode: Opcode) -> Instruction {
         Instruction {
-            opcode: opcode
+            opcode
         }
     }
 }
