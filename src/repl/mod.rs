@@ -32,7 +32,7 @@ impl REPL {
         Enter in a Hex String to execute opcodes directly on the vm
         Example for a LOAD command: 01 01 03 E8
         Example for add (add register 3 to register 1 and store in register 4): 02 01 03 04
-        
+
     Commands:
 
         .help | .usage : "shows this message"
@@ -136,7 +136,7 @@ impl REPL {
     /// Accepts a hexadecimal string WITHOUT a leading `0x` and returns a Vec of u8
     /// Example for a LOAD command: 01 01 03 E8 or 01 0C 03 E8
     fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError> {
-        let split = i.split(" ").collect::<Vec<&str>>();
+        let split = i.split(' ').collect::<Vec<&str>>();
         let mut results: Vec<u8> = vec![];
         for hex_string in split {
             let byte = u8::from_str_radix(&hex_string, 16);
