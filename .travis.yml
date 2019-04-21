@@ -83,9 +83,9 @@ jobs:
     - stage: build
       name: "Building"
       before_script:
-        - |
-            cargo install --path . &&
-            export PATH=$HOME/.cargo/bin:$PATH
+        # - |
+        #     cargo install --path . &&
+        #     export PATH=$HOME/.cargo/bin:$PATH
         - rustup self update
       script:
         - |
