@@ -29,6 +29,8 @@ impl REPL {//01 0C 03 E8
     Commands:
 
         .help | .usage : "shows this message"
+        .program : "prints the contents of the VM program instructions"
+        .registers : "prints the contents of the VM Registers"
         .history : "prints out history of inputted commands"
         .quit : "closes the shell process"
 
@@ -73,6 +75,20 @@ impl REPL {//01 0C 03 E8
             match buffer {
                 ".help" | ".usage" => {
                     REPL::print_help();
+                },
+                ".program" => {
+                    println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                    println!("Listing VM program instructions contents:");
+                    for instruction in &self.vm.get_program() {
+                        println!("[{}]", instruction);
+                    }
+                    println!("~~~~~~~End of Program Instructions~~~~~~~");
+                    println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                },
+                ".registers" => {
+                    println!("Listing registers and all contents:");
+                    println!("{:#?}", self.vm.get_registers());
+                    println!("End of registers listing.");
                 },
                 ".history" => {
                     for command in &self.command_buffer {

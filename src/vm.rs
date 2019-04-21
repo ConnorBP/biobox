@@ -203,6 +203,21 @@ impl VM {
         self.pc += 2;
         result
     }
+
+    //
+    // Setters and Getters
+    //
+
+    pub fn get_program(&mut self)->Vec<u8> {
+        //return a copy of the program contents vector
+        self.program.to_vec()
+    }
+
+    pub fn get_registers(&mut self)->[i32; 32] {
+        //return the data in the VM registers
+        self.registers
+    }
+
 }
 
 #[cfg(test)]
