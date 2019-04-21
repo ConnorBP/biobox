@@ -1,20 +1,24 @@
 use crate::instructions::Opcode;
 
-//this is the definition of our vm
+/// this is the definition of our vm
 #[derive(Default)]
 pub struct VM {
-    //the vm has 32bit wide registers
+    // the vm has 32bit wide registers
     registers: [i32; 32],
-    //program counter
+    // program counter
     pc: usize,
-    //program bytecode stored as a vector of bytes
+    // program bytecode stored as a vector of bytes
     program: Vec<u8>,
-    //the remainder attribute left over from division ops
+    // the remainder attribute left over from division ops
     remainder: u32,
+    // Dedicated flag register for the result of the last comparison operation
+    equal_flag: bool,
 }
 
-//implement the vm
+/// implementation of the vm
 impl VM {
+
+    /// Default values for a new VM
     pub fn new()->VM {
         VM {
             //fill the default values for the registers, program bytecode, and program counter
@@ -22,6 +26,7 @@ impl VM {
             program: vec![],
             pc: 0,
             remainder: 0,
+            equal_flag: false,
         }
     }
 
@@ -32,13 +37,15 @@ impl VM {
             is_done = self.execute_instruction();
         }
 
-        println!("Reached end of execution.");
+        println!("\n\nReached end of execution.");
     }
 
+    /// Runs only one instruction at current program counter (usually 0) then exits
     pub fn run_once(&mut self) {
         self.execute_instruction();
     }
 
+    /// this is run every time we need to execute the next instruction
     fn execute_instruction(&mut self) -> bool {
         // if program counter has exceeded length of the program itself, something is wrong
         if self.pc >= self.program.len() {
@@ -85,7 +92,8 @@ impl VM {
                 let result = self.pc.overflowing_add(target as usize);
                 if result.1 {
                     //panic!("PROGRAM COUNTER OVERFLOWED! (JMPF went above usize::MAX)");
-                    println!("\n\nPROGRAM COUNTER OVERFLOWED! (JMPF went above usize::MAX)\n");
+                    //panic if program counter overflows. (It should never overflow) and print debug info
+                    println!("\n\nPROGRAM COUNTER OVERFLOWED! (JMPF went above usize::MAX) at index: {} args: {}\n", self.pc, target);
                     return false;
                 }
                 self.pc = result.0;
@@ -95,10 +103,72 @@ impl VM {
                 let result = self.pc.overflowing_sub(target as usize);
                 if result.1 {
                     //panic!("PROGRAM COUNTER OVERFLOWED! (JMPB went below 0)");
-                    println!("\n\nPROGRAM COUNTER OVERFLOWED! (JMPB went below 0)\n");
+                    //panic if program counter overflows. (It should never overflow) and print debug info
+                    println!("\n\nPROGRAM COUNTER OVERFLOWED! (JMPB went below 0) at index: {} args: {}\n", self.pc, target);
                     return false;
                 }
                 self.pc = result.0;
+            },
+            Opcode::EQ => {//equal comparison operator
+                //get the contents of the first two registers (16 bits total)
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                //set the equal flag to the result of comparison
+                self.equal_flag = register1 == register2;
+                //advance the last 8 bits of the instruction row
+                self.next_8_bits();
+            },
+            Opcode::NEQ => {//not equal comparison operator
+                //get the contents of the first two registers (16 bits total)
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                //set the equal flag to the result of comparison
+                self.equal_flag = register1 != register2;
+                //advance the last 8 bits of the instruction row
+                self.next_8_bits();
+            },
+            Opcode::GT => {//greater than comparison operator
+                //get the contents of the first two registers (16 bits total)
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                //set the equal flag to the result of comparison
+                self.equal_flag = register1 > register2;
+                //advance the last 8 bits of the instruction row
+                self.next_8_bits();
+            },
+            Opcode::LT => {//less than comparison operator
+                //get the contents of the first two registers (16 bits total)
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                //set the equal flag to the result of comparison
+                self.equal_flag = register1 < register2;
+                //advance the last 8 bits of the instruction row
+                self.next_8_bits();
+            },
+            Opcode::GTQ => {//greater than or equal comparison operator
+                //get the contents of the first two registers (16 bits total)
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                //set the equal flag to the result of comparison
+                self.equal_flag = register1 >= register2;
+                //advance the last 8 bits of the instruction row
+                self.next_8_bits();
+            },
+            Opcode::LTQ => {//less than or equal comparison operator
+                //get the contents of the first two registers (16 bits total)
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                //set the equal flag to the result of comparison
+                self.equal_flag = register1 <= register2;
+                //advance the last 8 bits of the instruction row
+                self.next_8_bits();
+            },
+            Opcode::JEQ => {//jump if equal. Jumps to provided PC index if the previous comparison resulted in true
+                let register = usize::from(self.next_8_bits());
+                let target = self.registers[register];
+                if self.equal_flag {
+                    self.pc = target as usize;
+                }
             }
             _ => {
                 println!("\n\nUnrecognized opcode found! Terminating!\n");
@@ -219,5 +289,138 @@ mod tests {
         test_vm.run_once();
         //going back to from pc 2 is 0
         assert_eq!(test_vm.pc, 0);
+    }
+
+    #[test]
+    fn test_eq_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 10;
+        test_vm.registers[1] = 10;
+        //eq opcode(9) testing against registers 0 and 1 should result in true
+        test_vm.program = vec![
+            9, 0, 1, 0,
+            9, 0, 1, 0,
+        ];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 on a different value it should now result in false
+        test_vm.registers[1] = 11;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_neq_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 10;
+        test_vm.registers[1] = 12;
+        //neq opcode(10) testing against registers 0 and 1 should result in true
+        test_vm.program = vec![
+            10, 0, 1, 0,
+            10, 0, 1, 0,
+        ];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 on the same value now it should now result in false
+        test_vm.registers[1] = 10;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_gt_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 10;
+        test_vm.registers[1] = 9;
+        //gt opcode(11) testing against registers 0 and 1 should result in true
+        test_vm.program = vec![
+            11, 0, 1, 0,
+            11, 0, 1, 0,
+        ];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 on a different value it should now result in false
+        test_vm.registers[1] = 11;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_lt_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 10;
+        test_vm.registers[1] = 11;
+        //lt opcode(12) testing against registers 0 and 1 should result in true
+        test_vm.program = vec![
+            12, 0, 1, 0,
+            12, 0, 1, 0,
+        ];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 on a different value it should now result in false
+        test_vm.registers[1] = 9;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_gtq_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 10;
+        test_vm.registers[1] = 9;
+        //gtq opcode(13) testing against registers 0 and 1 should result in true
+        test_vm.program = vec![
+            13, 0, 1, 0,
+            13, 0, 1, 0,
+            13, 0, 1, 0,
+        ];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 as same value it should still result in true
+        test_vm.registers[1] = 10;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 as higher value it should now result in false
+        test_vm.registers[1] = 11;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_ltq_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 9;
+        test_vm.registers[1] = 10;
+        //ltq opcode(14) testing against registers 0 and 1 should result in true
+        test_vm.program = vec![
+            14, 0, 1, 0,
+            14, 0, 1, 0,
+            14, 0, 1, 0,
+        ];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 as same value it should still result in true
+        test_vm.registers[1] = 9;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //with register 1 as lower value it should now result in false
+        test_vm.registers[1] = 8;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_jeq_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 7;
+        test_vm.equal_flag = true;
+        //JEQ opcode 15 to the location in register 0 (7) if equal_flag is true (it is)
+        test_vm.program = vec![
+            15, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0
+        ];
+        test_vm.run_once();
+        assert_eq!(test_vm.pc, 7);
     }
 }
