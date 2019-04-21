@@ -14,7 +14,13 @@
 pub mod instructions;
 //vm after instructions because it uses instructions in the vm :)
 pub mod vm;
+//now bring in the REPL terminal (Read, Evaluate, and Print Loop)
+pub mod repl;
 
 fn main() {
-    println!("Hello, world!");
+    let mut repl_term = repl::REPL::new();
+    repl_term.run();
+
+
+    println!("Reached end of main.");
 }
