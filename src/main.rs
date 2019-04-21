@@ -21,6 +21,5 @@ fn main() {
     let mut repl_term = repl::REPL::new();
     repl_term.run();
 
-
     println!("Reached end of main.");
 }

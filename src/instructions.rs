@@ -19,12 +19,12 @@ pub enum Opcode {
     GTQ,
     LTQ,
     JEQ,
-    IGL
+    IGL,
 }
 
 //for converting a byte into the relivant opcode
 impl From<u8> for Opcode {
-    fn from(v: u8)->Self {
+    fn from(v: u8) -> Self {
         match v {
             0 => Opcode::HLT,
             1 => Opcode::LOAD,
@@ -42,7 +42,7 @@ impl From<u8> for Opcode {
             13 => Opcode::GTQ,
             14 => Opcode::LTQ,
             15 => Opcode::JEQ,
-            _ => Opcode::IGL
+            _ => Opcode::IGL,
         }
     }
 }
@@ -50,14 +50,12 @@ impl From<u8> for Opcode {
 //instructions
 #[derive(Debug, PartialEq)]
 pub struct Instruction {
-    opcode: Opcode
+    opcode: Opcode,
 }
 
 impl Instruction {
     pub fn new(opcode: Opcode) -> Instruction {
-        Instruction {
-            opcode
-        }
+        Instruction { opcode }
     }
 }
 

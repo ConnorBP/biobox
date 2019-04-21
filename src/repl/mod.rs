@@ -1,7 +1,7 @@
+use crate::vm::VM;
 use std;
 use std::io;
 use std::io::Write;
-use crate::vm::VM;
 
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
@@ -13,9 +13,9 @@ pub struct REPL {
     vm: VM,
 }
 
-impl REPL {//01 0C 03 E8
+impl REPL {
     /// Creates and returns a new assembly REPL
-    pub fn new()->REPL {
+    pub fn new() -> REPL {
         REPL {
             vm: VM::new(),
             command_buffer: vec![],
@@ -66,7 +66,9 @@ impl REPL {//01 0C 03 E8
             io::stdout().flush().expect("Unable to flush stdout");
 
             //read the line for the user input string
-            stdin.read_line(&mut buffer).expect("Unable to read line from user");
+            stdin
+                .read_line(&mut buffer)
+                .expect("Unable to read line from user");
             let buffer = buffer.trim();
 
             //store the history of command inputs
@@ -75,7 +77,7 @@ impl REPL {//01 0C 03 E8
             match buffer {
                 ".help" | ".usage" => {
                     REPL::print_help();
-                },
+                }
                 ".program" => {
                     println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                     println!("Listing VM program instructions contents:");
@@ -84,12 +86,12 @@ impl REPL {//01 0C 03 E8
                     }
                     println!("~~~~~~~End of Program Instructions~~~~~~~");
                     println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                },
+                }
                 ".registers" => {
                     println!("Listing registers and all contents:");
                     println!("{:#?}", self.vm.get_registers());
                     println!("End of registers listing.");
-                },
+                }
                 ".history" => {
                     for command in &self.command_buffer {
                         println!("> {}", command);
@@ -100,9 +102,9 @@ impl REPL {//01 0C 03 E8
                     println!("Goodbye!~");
                     stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
                     println!("~~~~~~~~~");
-                    std::process::exit(0);//ends the process right away
-                    //break;//break out of the execution loop to reach the natural end of the process
-                },
+                    std::process::exit(0); //ends the process right away
+                                           //break;//break out of the execution loop to reach the natural end of the process
+                }
                 _ => {
                     println!("Invalid input!");
                     REPL::print_help();
@@ -110,4 +112,5 @@ impl REPL {//01 0C 03 E8
             }
         }
     }
+
 }
