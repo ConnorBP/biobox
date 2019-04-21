@@ -1,0 +1,4 @@
+# BIObox
+[![Travis Build Status](https://travis-ci.com/ConnorBP/biobox.svg?token=oPv5RhN5awEXsvyyCgSk&branch=master)](https://travis-ci.com/ConnorBP/biobox)
+
+BIOBox (Input Output Blackbox) is a virtual machine with a focus on providing user generated drop-in blackbox modules for rust or c++ code to transform inputs to the module to their respective outputs returned by the VM. The goal of such a ssytem is to obfuscate sensitive code or values from being easily found by decompilers, and to run safely in an isolated environment. The VM code you pass into it can be stored in an encrypted state until passed into the VM as well.
