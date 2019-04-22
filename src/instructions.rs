@@ -26,14 +26,15 @@ pub enum Opcode {
     BETW,
     JEQ,
     NOP,
+    ALOC,
     IGL,
 }
 
 impl Opcode {
     pub fn iterator() -> Iter<'static, Opcode> {
-        static OPCODES: [Opcode; 19] = [
+        static OPCODES: [Opcode; 20] = [
             HLT, LOAD, ADD, SUB, MUL, DIV, JMP, JMPF, JMPB, EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, JEQ,
-            NOP, IGL,
+            NOP, ALOC, IGL,
         ];
         OPCODES.iter()
     }
@@ -69,6 +70,7 @@ impl From<u8> for Opcode {
             15 => Opcode::BETW,
             16 => Opcode::JEQ,
             17 => Opcode::NOP,
+            18 => Opcode::ALOC,
             _ => Opcode::IGL,
         }
     }
@@ -76,25 +78,26 @@ impl From<u8> for Opcode {
 
 impl<'a> From<CompleteStr<'a>> for Opcode {
     fn from(v: CompleteStr<'a>) -> Self {
-        match v {
-            CompleteStr("hlt") => Opcode::HLT,
-            CompleteStr("load") => Opcode::LOAD,
-            CompleteStr("add") => Opcode::ADD,
-            CompleteStr("sub") => Opcode::SUB,
-            CompleteStr("mul") => Opcode::MUL,
-            CompleteStr("div") => Opcode::DIV,
-            CompleteStr("jmp") => Opcode::JMP,
-            CompleteStr("jmpf") => Opcode::JMPF,
-            CompleteStr("jmpb") => Opcode::JMPB,
-            CompleteStr("eq") => Opcode::EQ,
-            CompleteStr("neq") => Opcode::NEQ,
-            CompleteStr("gt") => Opcode::GT,
-            CompleteStr("lt") => Opcode::LT,
-            CompleteStr("gteq") => Opcode::GTEQ,
-            CompleteStr("lteq") => Opcode::LTEQ,
-            CompleteStr("betw") => Opcode::BETW,
-            CompleteStr("jeq") => Opcode::JEQ,
-            CompleteStr("nop") => Opcode::NOP,
+        match v.to_lowercase().as_str() {
+            "hlt" => Opcode::HLT,
+            "load" => Opcode::LOAD,
+            "add" => Opcode::ADD,
+            "sub" => Opcode::SUB,
+            "mul" => Opcode::MUL,
+            "div" => Opcode::DIV,
+            "jmp" => Opcode::JMP,
+            "jmpf" => Opcode::JMPF,
+            "jmpb" => Opcode::JMPB,
+            "eq" => Opcode::EQ,
+            "neq" => Opcode::NEQ,
+            "gt" => Opcode::GT,
+            "lt" => Opcode::LT,
+            "gteq" => Opcode::GTEQ,
+            "lteq" => Opcode::LTEQ,
+            "betw" => Opcode::BETW,
+            "jeq" => Opcode::JEQ,
+            "nop" => Opcode::NOP,
+            "aloc" => Opcode::ALOC,
             _ => Opcode::IGL,
         }
     }

@@ -9,6 +9,8 @@ pub struct VM {
     pc: usize,
     // program bytecode stored as a vector of bytes
     program: Vec<u8>,
+    //our heap allocated pretend MEMORY for the vm.
+    heap: Vec<u8>,
     // the remainder attribute left over from division ops
     remainder: u32,
     // Dedicated flag register for the result of the last comparison operation
@@ -23,6 +25,7 @@ impl VM {
             //fill the default values for the registers, program bytecode, and program counter
             registers: [0; 32],
             program: vec![],
+            heap: vec![],
             pc: 0,
             remainder: 0,
             equal_flag: false,
@@ -54,7 +57,13 @@ impl VM {
         match self.decode_opcode() {
             Opcode::HLT => {
                 println!("\n\nHLT Encountered\n");
-                return false;
+                return false; //cancels out of loop to halt running
+            }
+            Opcode::NOP => {
+                //do nothing
+                //advance to next instruction for the next loop
+                self.next_16_bits();
+                self.next_8_bits();
             }
             Opcode::LOAD => {
                 let register = self.next_8_bits() as usize; // cast to usize to use as index in the array
@@ -182,6 +191,15 @@ impl VM {
                 let lower = self.registers[self.next_8_bits() as usize];
                 let upper = self.registers[self.next_8_bits() as usize];
                 self.equal_flag = value > lower && value < upper;
+            }
+            Opcode::ALOC => {
+                //heap memory allocation system opcode for the simulated heap memory
+                let register = usize::from(self.next_8_bits());
+                let bytes = self.registers[register];
+                let new_end = self.heap.len() as i32 + bytes;
+                self.heap.resize(new_end as usize, 0);
+                //move the final 16 bits of the instruction line
+                self.next_16_bits();
             }
             Opcode::JEQ => {
                 //jump if equal. Jumps to provided PC index if the previous comparison resulted in true
@@ -456,5 +474,27 @@ mod tests {
         test_vm.program = vec![16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 7);
+    }
+
+    #[test]
+    fn test_nop_opcode() {
+        let mut test_vm = VM::new();
+        //nop opcode 17 should do nothing and simply increase pc to next row
+        test_vm.program = vec![17, 0, 0, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.pc, 4);
+    }
+
+    #[test]
+    fn test_aloc_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 1024;
+        //aloc opcode 18
+        test_vm.program = vec![18, 0, 0, 0];
+        test_vm.run_once();
+        //heap should be aloc'd to 1024
+        assert_eq!(test_vm.heap.len(), 1024);
+        //program counter should be next row after running
+        assert_eq!(test_vm.pc, 4);
     }
 }
