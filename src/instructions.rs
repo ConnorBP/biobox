@@ -1,7 +1,7 @@
 //our virtual machines list of OPCODES
 
 //opcodes
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Opcode {
     HLT,
     LOAD,
