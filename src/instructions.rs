@@ -35,7 +35,7 @@ impl Opcode {
             HLT, LOAD, ADD, SUB, MUL, DIV, JMP, JMPF, JMPB, EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, JEQ,
             NOP, IGL,
         ];
-        OPCODES.into_iter()
+        OPCODES.iter()
     }
 
     pub fn get_list() {
