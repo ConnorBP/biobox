@@ -2,6 +2,9 @@
 
 use nom::types::CompleteStr;
 
+use self::Opcode::*;
+use std::slice::Iter;
+
 //opcodes
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Opcode {
@@ -24,6 +27,24 @@ pub enum Opcode {
     JEQ,
     NOP,
     IGL,
+}
+
+impl Opcode {
+    pub fn iterator() -> Iter<'static, Opcode> {
+        static OPCODES: [Opcode; 19] = [
+            HLT, LOAD, ADD, SUB, MUL, DIV, JMP, JMPF, JMPB, EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, JEQ,
+            NOP, IGL,
+        ];
+        OPCODES.into_iter()
+    }
+
+    pub fn get_list() {
+        //let out = String::new();
+        for opc in Opcode::iterator() {
+            println!("{:?}", opc);
+            //out.push_str();
+        }
+    }
 }
 
 //for converting a byte into the relivant opcode

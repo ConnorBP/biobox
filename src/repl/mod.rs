@@ -1,4 +1,5 @@
 use crate::assembler::program_parsers::program;
+use crate::instructions::Opcode;
 use crate::vm::VM;
 
 use std;
@@ -43,11 +44,12 @@ impl REPL {
 
     Commands:
 
-        .help | .usage : "shows this message"
-        .program : "prints the contents of the VM program instructions"
-        .registers : "prints the contents of the VM Registers"
-        .history : "prints out history of inputted commands"
-        .quit : "closes the shell process"
+        .help | .usage    : "shows this message"
+        .codes | .asm     : "shows a list of opcodes/instructions available"
+        .program          : "prints the contents of the VM program instructions"
+        .registers        : "prints the contents of the VM Registers"
+        .history          : "prints out history of inputted commands"
+        .quit             : "closes the shell process"
 
 ========================
             "#
@@ -105,6 +107,9 @@ impl REPL {
                 ".help" | ".usage" => {
                     REPL::print_help();
                 }
+                ".codes" | ".instructions" | ".asm" => {
+                    Opcode::get_list();
+                }
                 ".program" => {
                     println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                     println!("Listing VM program instructions contents:");
@@ -161,8 +166,14 @@ impl REPL {
                             //assume assembly input mode
                             match program(buffer.into()) {
                                 Ok((_, program)) => {
-                                    self.vm.append_bytes(program.to_bytes());
-                                    self.vm.run_once();
+                                    //check first if the opcodes are valid before running on system
+                                    if program.is_valid() {
+                                        self.vm.append_bytes(program.to_bytes());
+                                        self.vm.run_once();
+                                    } else {
+                                        println!("Invalid opcode or operands!");
+                                        REPL::print_help()
+                                    }
                                 }
                                 Err(_) => {
                                     println!("Unable to parse input. Please check your syntax.");

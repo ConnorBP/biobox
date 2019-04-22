@@ -1,6 +1,7 @@
 use super::opcode_parsers::*;
 use super::operand_parsers::operand;
 use super::Token;
+use crate::instructions::Opcode;
 use nom::multispace;
 
 use nom::types::CompleteStr;
@@ -56,6 +57,10 @@ impl AssemblerInstruction {
                 std::process::exit(1);
             }
         };
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.opcode != Token::Op { code: Opcode::IGL }
     }
 }
 

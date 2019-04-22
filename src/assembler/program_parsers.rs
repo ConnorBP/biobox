@@ -15,6 +15,15 @@ impl Program {
         }
         program
     }
+
+    pub fn is_valid(&self) -> bool {
+        for instruction in &self.instructions {
+            if !instruction.is_valid() {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 named!(pub program<CompleteStr, Program>,
