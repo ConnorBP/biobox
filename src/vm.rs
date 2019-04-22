@@ -175,6 +175,14 @@ impl VM {
                 //advance the last 8 bits of the instruction row
                 self.next_8_bits();
             }
+            Opcode::BTW => {
+                //BETWEEN COMPARISON OPERATOR BTW $VALUE $LOWERBOUND $UPPERBOUND
+                //Combines less than and greater than into only one instruction
+                let value = self.registers[self.next_8_bits() as usize];
+                let lower = self.registers[self.next_8_bits() as usize];
+                let upper = self.registers[self.next_8_bits() as usize];
+                self.equal_flag = value > lower && value < upper;
+            }
             Opcode::JEQ => {
                 //jump if equal. Jumps to provided PC index if the previous comparison resulted in true
                 let register = usize::from(self.next_8_bits());
@@ -416,12 +424,32 @@ mod tests {
     }
 
     #[test]
+    fn test_btw_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 9;
+        test_vm.registers[1] = 5; //lower
+        test_vm.registers[2] = 12; //upper
+                                   //btw opcode(15) 9 should be between 5 and 12
+        test_vm.program = vec![15, 0, 1, 2, 15, 0, 1, 2, 15, 0, 1, 2];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        //should return false since 4 is below lower bound of 5
+        test_vm.registers[0] = 4;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+        //should return false with 13 above upper bound of 12
+        test_vm.registers[0] = 13;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
     fn test_jeq_opcode() {
         let mut test_vm = VM::new();
         test_vm.registers[0] = 7;
         test_vm.equal_flag = true;
         //JEQ opcode 15 to the location in register 0 (7) if equal_flag is true (it is)
-        test_vm.program = vec![15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        test_vm.program = vec![16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 7);
     }
