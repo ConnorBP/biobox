@@ -49,14 +49,22 @@ impl REPL {
     pub fn run(&mut self) {
         let mut stdout = StandardStream::stdout(ColorChoice::Always);
         //writeln!(&mut stdout, "green text!");
-        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Magenta))).expect("set color failed");
+        stdout
+            .set_color(ColorSpec::new().set_fg(Some(Color::Magenta)))
+            .expect("set color failed");
         print!("==========");
-        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green))).expect("set color failed");
+        stdout
+            .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
+            .expect("set color failed");
         print!("BIOBOX Terminal");
-        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Magenta))).expect("set color failed");
+        stdout
+            .set_color(ColorSpec::new().set_fg(Some(Color::Magenta)))
+            .expect("set color failed");
         println!("==========");
         println!("===================================");
-        stdout.set_color(ColorSpec::new().set_fg(Some(Color::White))).expect("set color failed");
+        stdout
+            .set_color(ColorSpec::new().set_fg(Some(Color::White)))
+            .expect("set color failed");
         // this allocates a new String that we store what the user types each loop itteration
         let mut buffer;
         loop {
@@ -67,9 +75,13 @@ impl REPL {
             let stdin = io::stdin();
 
             //our fancy terminal prompt :^) TODO: Replace print and flush with the manual version
-            stdout.set_color(ColorSpec::new().set_fg(Some(Color::Cyan))).expect("set color failed");
+            stdout
+                .set_color(ColorSpec::new().set_fg(Some(Color::Cyan)))
+                .expect("set color failed");
             print!("B~> ");
-            stdout.set_color(ColorSpec::new().set_fg(Some(Color::White))).expect("set color failed");
+            stdout
+                .set_color(ColorSpec::new().set_fg(Some(Color::White)))
+                .expect("set color failed");
             io::stdout().flush().expect("Unable to flush stdout");
 
             //read the line for the user input string
@@ -105,9 +117,13 @@ impl REPL {
                     }
                 }
                 ".quit" => {
-                    stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red))).expect("set color failed");
+                    stdout
+                        .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
+                        .expect("set color failed");
                     println!("Goodbye!~");
-                    stdout.set_color(ColorSpec::new().set_fg(Some(Color::White))).expect("set color failed");
+                    stdout
+                        .set_color(ColorSpec::new().set_fg(Some(Color::White)))
+                        .expect("set color failed");
                     println!("~~~~~~~~~");
                     std::process::exit(0); //ends the process right away
                                            //break;//break out of the execution loop to reach the natural end of the process
