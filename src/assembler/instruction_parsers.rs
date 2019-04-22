@@ -1,3 +1,5 @@
+use super::directive_parsers::directive;
+use super::label_parsers::*;
 use super::opcode_parsers::*;
 use super::operand_parsers::operand;
 use super::Token;
@@ -8,17 +10,19 @@ use nom::types::CompleteStr;
 
 #[derive(Debug, PartialEq)]
 pub struct AssemblerInstruction {
-    opcode: Token,
-    operand1: Option<Token>,
-    operand2: Option<Token>,
-    operand3: Option<Token>,
+    pub opcode: Option<Token>,
+    pub label: Option<Token>,
+    pub directive: Option<Token>,
+    pub operand1: Option<Token>,
+    pub operand2: Option<Token>,
+    pub operand3: Option<Token>,
 }
 
 impl AssemblerInstruction {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut results = vec![];
         match self.opcode {
-            Token::Op { code } => match code {
+            Some(Token::Op { code }) => match code {
                 _ => {
                     results.push(code as u8);
                 }
@@ -69,7 +73,8 @@ impl AssemblerInstruction {
     }
 
     pub fn is_valid(&self) -> bool {
-        self.opcode != Token::Op { code: Opcode::IGL }
+        //if there is no opcode then there has to be a directive TODO: CHECK FOR DIRECTIVES
+        self.opcode != Some(Token::Op { code: Opcode::IGL }) && self.opcode != None
     }
 }
 
@@ -77,7 +82,8 @@ impl AssemblerInstruction {
 named!(pub instruction<CompleteStr, AssemblerInstruction>,
     do_parse!(
         ins: alt!(
-            instruction_format
+            instruction_format |
+            directive
         ) >>
         (
             ins
@@ -89,7 +95,8 @@ named!(pub instruction<CompleteStr, AssemblerInstruction>,
 /// LOAD $0 #42
 named!(instruction_format<CompleteStr, AssemblerInstruction>,
     do_parse!(
-        o: opcode >>
+        o: opt!(opcode) >>
+        l: opt!(label_declaration) >>
         o1: opt!(operand) >>
         o2: opt!(operand) >>
         o3: opt!(operand) >>
@@ -97,14 +104,14 @@ named!(instruction_format<CompleteStr, AssemblerInstruction>,
         (
             AssemblerInstruction{
                 opcode: o,
+                label: l,
+                directive: None,
                 operand1: o1,
                 operand2: o2,
                 operand3: o3,
             }
         )
     )
-
-
 );
 
 #[cfg(test)]
@@ -112,24 +119,6 @@ mod tests {
     use super::*;
     use crate::assembler::Token;
     use crate::instructions::Opcode;
-
-    // #[test]
-    // fn test_parse_instruction_form_one() {
-    //     let result = instruction_one(CompleteStr("load $0 #42\n"));
-    //     assert_eq!(
-    //         result,
-    //         Ok((
-    //             CompleteStr(""),
-    //             AssemblerInstruction {
-    //                 //label: None,
-    //                 opcode: Token::Op { code: Opcode::LOAD },
-    //                 operand1: Some(Token::Register { reg_num: 0 }),
-    //                 operand2: Some(Token::IntegerOperand { value: 42 }),
-    //                 operand3: None
-    //             }
-    //         ))
-    //     );
-    // }
 
     #[test]
     fn test_parse_instruction_format() {
@@ -139,7 +128,9 @@ mod tests {
             Ok((
                 CompleteStr(""),
                 AssemblerInstruction {
-                    opcode: Token::Op { code: Opcode::HLT },
+                    opcode: Some(Token::Op { code: Opcode::HLT }),
+                    label: None,
+                    directive: None,
                     operand1: None,
                     operand2: None,
                     operand3: None
