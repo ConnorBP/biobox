@@ -155,7 +155,7 @@ impl VM {
                 //advance the last 8 bits of the instruction row
                 self.next_8_bits();
             }
-            Opcode::GTQ => {
+            Opcode::GTEQ => {
                 //greater than or equal comparison operator
                 //get the contents of the first two registers (16 bits total)
                 let register1 = self.registers[self.next_8_bits() as usize];
@@ -165,7 +165,7 @@ impl VM {
                 //advance the last 8 bits of the instruction row
                 self.next_8_bits();
             }
-            Opcode::LTQ => {
+            Opcode::LTEQ => {
                 //less than or equal comparison operator
                 //get the contents of the first two registers (16 bits total)
                 let register1 = self.registers[self.next_8_bits() as usize];
@@ -175,7 +175,7 @@ impl VM {
                 //advance the last 8 bits of the instruction row
                 self.next_8_bits();
             }
-            Opcode::BTW => {
+            Opcode::BETW => {
                 //BETWEEN COMPARISON OPERATOR BTW $VALUE $LOWERBOUND $UPPERBOUND
                 //Combines less than and greater than into only one instruction
                 let value = self.registers[self.next_8_bits() as usize];

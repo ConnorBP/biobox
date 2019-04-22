@@ -1,4 +1,4 @@
-use super::instruction_parsers::{instruction_one, AssemblerInstruction};
+use super::instruction_parsers::{instruction, AssemblerInstruction};
 
 use nom::types::CompleteStr;
 
@@ -19,7 +19,7 @@ impl Program {
 
 named!(pub program<CompleteStr, Program>,
     do_parse!(
-        instructions: many1!(instruction_one) >>
+        instructions: many1!(instruction) >>
         (
             Program {
                 instructions: instructions

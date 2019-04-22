@@ -1,7 +1,7 @@
 use super::opcode_parsers::*;
-use super::operand_parsers::integer_operand;
-use super::register_parsers::register;
+use super::operand_parsers::operand;
 use super::Token;
+use nom::multispace;
 
 use nom::types::CompleteStr;
 
@@ -59,19 +59,33 @@ impl AssemblerInstruction {
     }
 }
 
+/// Will try to parse out any of the Instruction forms
+named!(pub instruction<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        ins: alt!(
+            instruction_format
+        ) >>
+        (
+            ins
+        )
+    )
+);
+
 /// Handles instructions in the following format:
 /// LOAD $0 #42
-named!(pub instruction_one<CompleteStr, AssemblerInstruction>,
+named!(instruction_format<CompleteStr, AssemblerInstruction>,
     do_parse!(
-        o: opcode_load >>
-        r: register >>
-        i: integer_operand >>
+        o: opcode >>
+        o1: opt!(operand) >>
+        o2: opt!(operand) >>
+        o3: opt!(operand) >>
+        opt!(multispace) >>
         (
             AssemblerInstruction{
                 opcode: o,
-                operand1: Some(r),
-                operand2: Some(i),
-                operand3: None
+                operand1: o1,
+                operand2: o2,
+                operand3: o3,
             }
         )
     )
@@ -85,18 +99,35 @@ mod tests {
     use crate::assembler::Token;
     use crate::instructions::Opcode;
 
+    // #[test]
+    // fn test_parse_instruction_form_one() {
+    //     let result = instruction_one(CompleteStr("load $0 #42\n"));
+    //     assert_eq!(
+    //         result,
+    //         Ok((
+    //             CompleteStr(""),
+    //             AssemblerInstruction {
+    //                 //label: None,
+    //                 opcode: Token::Op { code: Opcode::LOAD },
+    //                 operand1: Some(Token::Register { reg_num: 0 }),
+    //                 operand2: Some(Token::IntegerOperand { value: 42 }),
+    //                 operand3: None
+    //             }
+    //         ))
+    //     );
+    // }
+
     #[test]
-    fn test_parse_instruction_form_one() {
-        let result = instruction_one(CompleteStr("load $0 #42\n"));
+    fn test_parse_instruction_format() {
+        let result = instruction_format(CompleteStr("hlt\n"));
         assert_eq!(
             result,
             Ok((
                 CompleteStr(""),
                 AssemblerInstruction {
-                    //label: None,
-                    opcode: Token::Op { code: Opcode::LOAD },
-                    operand1: Some(Token::Register { reg_num: 0 }),
-                    operand2: Some(Token::IntegerOperand { value: 42 }),
+                    opcode: Token::Op { code: Opcode::HLT },
+                    operand1: None,
+                    operand2: None,
                     operand3: None
                 }
             ))

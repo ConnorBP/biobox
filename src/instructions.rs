@@ -1,5 +1,7 @@
 //our virtual machines list of OPCODES
 
+use nom::types::CompleteStr;
+
 //opcodes
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Opcode {
@@ -16,10 +18,11 @@ pub enum Opcode {
     NEQ,
     GT,
     LT,
-    GTQ,
-    LTQ,
+    GTEQ,
+    LTEQ,
+    BETW,
     JEQ,
-    BTW,
+    NOP,
     IGL,
 }
 
@@ -40,10 +43,37 @@ impl From<u8> for Opcode {
             10 => Opcode::NEQ,
             11 => Opcode::GT,
             12 => Opcode::LT,
-            13 => Opcode::GTQ,
-            14 => Opcode::LTQ,
-            15 => Opcode::BTW,
+            13 => Opcode::GTEQ,
+            14 => Opcode::LTEQ,
+            15 => Opcode::BETW,
             16 => Opcode::JEQ,
+            17 => Opcode::NOP,
+            _ => Opcode::IGL,
+        }
+    }
+}
+
+impl<'a> From<CompleteStr<'a>> for Opcode {
+    fn from(v: CompleteStr<'a>) -> Self {
+        match v {
+            CompleteStr("hlt") => Opcode::HLT,
+            CompleteStr("load") => Opcode::LOAD,
+            CompleteStr("add") => Opcode::ADD,
+            CompleteStr("sub") => Opcode::SUB,
+            CompleteStr("mul") => Opcode::MUL,
+            CompleteStr("div") => Opcode::DIV,
+            CompleteStr("jmp") => Opcode::JMP,
+            CompleteStr("jmpf") => Opcode::JMPF,
+            CompleteStr("jmpb") => Opcode::JMPB,
+            CompleteStr("eq") => Opcode::EQ,
+            CompleteStr("neq") => Opcode::NEQ,
+            CompleteStr("gt") => Opcode::GT,
+            CompleteStr("lt") => Opcode::LT,
+            CompleteStr("gteq") => Opcode::GTEQ,
+            CompleteStr("lteq") => Opcode::LTEQ,
+            CompleteStr("betw") => Opcode::BETW,
+            CompleteStr("jeq") => Opcode::JEQ,
+            CompleteStr("nop") => Opcode::NOP,
             _ => Opcode::IGL,
         }
     }
@@ -75,5 +105,13 @@ mod tests {
     fn test_create_instruction() {
         let instruction = Instruction::new(Opcode::HLT);
         assert_eq!(instruction.opcode, Opcode::HLT);
+    }
+
+    #[test]
+    fn test_str_to_opcode() {
+        let opcode = Opcode::from(CompleteStr("gteq"));
+        assert_eq!(opcode, Opcode::GTEQ);
+        let opcode = Opcode::from(CompleteStr("illegal"));
+        assert_eq!(opcode, Opcode::IGL);
     }
 }
