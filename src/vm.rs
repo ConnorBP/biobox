@@ -279,7 +279,7 @@ mod tests {
     #[test]
     fn test_opcode_hlt() {
         let mut test_vm = VM::new();
-        let test_bytes = vec![0, 0, 0, 0];
+        let test_bytes = vec![Opcode::HLT as u8, 0, 0, 0];
         test_vm.program = test_bytes;
         test_vm.run_once();
         assert_eq!(test_vm.pc, 1);
@@ -298,7 +298,7 @@ mod tests {
     fn test_load_opcode() {
         let mut test_vm = VM::new();
         //load opcode = 1
-        test_vm.program = vec![1, 0, 1, 244]; //this is how we represent 500 using two u8s in little endian format
+        test_vm.program = vec![Opcode::LOAD as u8, 0, 1, 244]; //this is how we represent 500 using two u8s in little endian format
         test_vm.run_once();
         assert_eq!(test_vm.registers[0], 500);
     }
@@ -310,7 +310,7 @@ mod tests {
         test_vm.registers[0] = 500;
         test_vm.registers[1] = 24;
         //add(2) the values of register 0 and 1 then store the result into register 3
-        test_vm.program = vec![2, 0, 1, 3];
+        test_vm.program = vec![Opcode::ADD as u8, 0, 1, 3];
         test_vm.run_once();
         assert_eq!(test_vm.registers[3], 524);
     }
@@ -320,7 +320,7 @@ mod tests {
         let mut test_vm = VM::new();
         //jump to pc 1
         test_vm.registers[0] = 1;
-        test_vm.program = vec![6, 0, 0, 0];
+        test_vm.program = vec![Opcode::JMP as u8, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 1);
     }
@@ -331,7 +331,7 @@ mod tests {
         test_vm.registers[0] = 2;
         //7, 0 is jump forward amount in reg0 (which is 2) which skips the last 2 zeros of line1 (the remaining 16 bits on the jmpf instruction line)
         // into line2 which is a normal jmp at index 4bytes (32 bits, the second instruction row)
-        test_vm.program = vec![7, 0, 0, 0, 6, 0, 0, 0];
+        test_vm.program = vec![Opcode::JMPF as u8, 0, 0, 0, Opcode::JMP as u8, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 4);
     }
@@ -341,7 +341,7 @@ mod tests {
         let mut test_vm = VM::new();
         test_vm.registers[0] = 2;
         //goes forward 2 bytes to read instruction and register 0, register 0 is 2 which means go back 2
-        test_vm.program = vec![8, 0, 0, 0];
+        test_vm.program = vec![Opcode::JMPB as u8, 0, 0, 0];
         test_vm.run_once();
         //going back to from pc 2 is 0
         assert_eq!(test_vm.pc, 0);
@@ -353,7 +353,7 @@ mod tests {
         test_vm.registers[0] = 10;
         test_vm.registers[1] = 10;
         //eq opcode(9) testing against registers 0 and 1 should result in true
-        test_vm.program = vec![9, 0, 1, 0, 9, 0, 1, 0];
+        test_vm.program = vec![Opcode::EQ as u8, 0, 1, 0, Opcode::EQ as u8, 0, 1, 0];
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
         //with register 1 on a different value it should now result in false
@@ -368,7 +368,7 @@ mod tests {
         test_vm.registers[0] = 10;
         test_vm.registers[1] = 12;
         //neq opcode(10) testing against registers 0 and 1 should result in true
-        test_vm.program = vec![10, 0, 1, 0, 10, 0, 1, 0];
+        test_vm.program = vec![Opcode::NEQ as u8, 0, 1, 0, Opcode::NEQ as u8, 0, 1, 0];
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
         //with register 1 on the same value now it should now result in false
@@ -383,7 +383,7 @@ mod tests {
         test_vm.registers[0] = 10;
         test_vm.registers[1] = 9;
         //gt opcode(11) testing against registers 0 and 1 should result in true
-        test_vm.program = vec![11, 0, 1, 0, 11, 0, 1, 0];
+        test_vm.program = vec![Opcode::GT as u8, 0, 1, 0, Opcode::GT as u8, 0, 1, 0];
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
         //with register 1 on a different value it should now result in false
@@ -398,7 +398,7 @@ mod tests {
         test_vm.registers[0] = 10;
         test_vm.registers[1] = 11;
         //lt opcode(12) testing against registers 0 and 1 should result in true
-        test_vm.program = vec![12, 0, 1, 0, 12, 0, 1, 0];
+        test_vm.program = vec![Opcode::LT as u8, 0, 1, 0, Opcode::LT as u8, 0, 1, 0];
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
         //with register 1 on a different value it should now result in false
@@ -413,7 +413,20 @@ mod tests {
         test_vm.registers[0] = 10;
         test_vm.registers[1] = 9;
         //gtq opcode(13) testing against registers 0 and 1 should result in true
-        test_vm.program = vec![13, 0, 1, 0, 13, 0, 1, 0, 13, 0, 1, 0];
+        test_vm.program = vec![
+            Opcode::GTEQ as u8,
+            0,
+            1,
+            0,
+            Opcode::GTEQ as u8,
+            0,
+            1,
+            0,
+            Opcode::GTEQ as u8,
+            0,
+            1,
+            0,
+        ];
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
         //with register 1 as same value it should still result in true
@@ -432,7 +445,20 @@ mod tests {
         test_vm.registers[0] = 9;
         test_vm.registers[1] = 10;
         //ltq opcode(14) testing against registers 0 and 1 should result in true
-        test_vm.program = vec![14, 0, 1, 0, 14, 0, 1, 0, 14, 0, 1, 0];
+        test_vm.program = vec![
+            Opcode::LTEQ as u8,
+            0,
+            1,
+            0,
+            Opcode::LTEQ as u8,
+            0,
+            1,
+            0,
+            Opcode::LTEQ as u8,
+            0,
+            1,
+            0,
+        ];
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
         //with register 1 as same value it should still result in true
@@ -452,7 +478,20 @@ mod tests {
         test_vm.registers[1] = 5; //lower
         test_vm.registers[2] = 12; //upper
                                    //btw opcode(15) 9 should be between 5 and 12
-        test_vm.program = vec![15, 0, 1, 2, 15, 0, 1, 2, 15, 0, 1, 2];
+        test_vm.program = vec![
+            Opcode::BETW as u8,
+            0,
+            1,
+            2,
+            Opcode::BETW as u8,
+            0,
+            1,
+            2,
+            Opcode::BETW as u8,
+            0,
+            1,
+            2,
+        ];
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
         //should return false since 4 is below lower bound of 5
@@ -471,7 +510,7 @@ mod tests {
         test_vm.registers[0] = 7;
         test_vm.equal_flag = true;
         //JEQ opcode 15 to the location in register 0 (7) if equal_flag is true (it is)
-        test_vm.program = vec![16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        test_vm.program = vec![Opcode::JEQ as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 7);
     }
@@ -480,7 +519,7 @@ mod tests {
     fn test_nop_opcode() {
         let mut test_vm = VM::new();
         //nop opcode 17 should do nothing and simply increase pc to next row
-        test_vm.program = vec![17, 0, 0, 0];
+        test_vm.program = vec![Opcode::NOP as u8, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 4);
     }
@@ -490,7 +529,7 @@ mod tests {
         let mut test_vm = VM::new();
         test_vm.registers[0] = 1024;
         //aloc opcode 18
-        test_vm.program = vec![18, 0, 0, 0];
+        test_vm.program = vec![Opcode::ALOC as u8, 0, 0, 0];
         test_vm.run_once();
         //heap should be aloc'd to 1024
         assert_eq!(test_vm.heap.len(), 1024);
