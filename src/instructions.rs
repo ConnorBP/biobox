@@ -27,14 +27,16 @@ pub enum Opcode {
     JEQ,
     NOP,
     ALOC,
+    INC,
+    DEC,
     IGL,
 }
 
 impl Opcode {
     pub fn iterator() -> Iter<'static, Opcode> {
-        static OPCODES: [Opcode; 20] = [
+        static OPCODES: [Opcode; 22] = [
             HLT, LOAD, ADD, SUB, MUL, DIV, JMP, JMPF, JMPB, EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, JEQ,
-            NOP, ALOC, IGL,
+            NOP, ALOC, INC, DEC, IGL,
         ];
         OPCODES.iter()
     }
@@ -71,6 +73,8 @@ impl From<u8> for Opcode {
             16 => Opcode::JEQ,
             17 => Opcode::NOP,
             18 => Opcode::ALOC,
+            19 => Opcode::INC,
+            20 => Opcode::DEC,
             _ => Opcode::IGL,
         }
     }
@@ -98,6 +102,8 @@ impl<'a> From<CompleteStr<'a>> for Opcode {
             "jeq" => Opcode::JEQ,
             "nop" => Opcode::NOP,
             "aloc" => Opcode::ALOC,
+            "inc" => Opcode::INC,
+            "dec" => Opcode::DEC,
             _ => Opcode::IGL,
         }
     }

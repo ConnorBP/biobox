@@ -209,6 +209,20 @@ impl VM {
                     self.pc = target as usize;
                 }
             }
+            Opcode::INC => {
+                //increment the value at register
+                let register = usize::from(self.next_8_bits());
+                self.registers[register] += 1;
+                //advance the final 16 bits
+                self.next_16_bits();
+            }
+            Opcode::DEC => {
+                //decrement the value at register
+                let register = usize::from(self.next_8_bits());
+                self.registers[register] -= 1;
+                //advance the final 16 bits
+                self.next_16_bits();
+            }
             _ => {
                 println!("\n\nUnrecognized opcode found! Terminating!\n");
                 return false;
@@ -313,6 +327,35 @@ mod tests {
         test_vm.program = vec![Opcode::ADD as u8, 0, 1, 3];
         test_vm.run_once();
         assert_eq!(test_vm.registers[3], 524);
+    }
+
+    #[test]
+    fn test_inc_opcode() {
+        let mut test_vm = VM::new();
+        //register 1 is 41
+        test_vm.registers[1] = 41;
+        //add(2) the values of register 0 and 1 then store the result into register 3
+        test_vm.program = vec![Opcode::INC as u8, 0, 0, 0, Opcode::INC as u8, 1, 0, 0];
+        test_vm.run_once();
+        test_vm.run_once();
+        //both registers 0, and 1 should have been incremented once
+        assert_eq!(test_vm.registers[0], 1);
+        assert_eq!(test_vm.registers[1], 42);
+    }
+
+    #[test]
+    fn test_dec_opcode() {
+        let mut test_vm = VM::new();
+        //register 1 is 45 register 0 is 999
+        test_vm.registers[0] = 999;
+        test_vm.registers[1] = 45;
+        //add(2) the values of register 0 and 1 then store the result into register 3
+        test_vm.program = vec![Opcode::DEC as u8, 0, 0, 0, Opcode::DEC as u8, 1, 0, 0];
+        test_vm.run_once();
+        test_vm.run_once();
+        //both registers 0, and 1 should have been decremented once
+        assert_eq!(test_vm.registers[0], 998);
+        assert_eq!(test_vm.registers[1], 44);
     }
 
     #[test]
