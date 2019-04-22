@@ -1,6 +1,5 @@
 use crate::assembler::program_parsers::program;
 use crate::vm::VM;
-use nom::types::CompleteStr;
 
 use std;
 use std::io;
@@ -160,18 +159,16 @@ impl REPL {
                         }
                         _ => {
                             //assume assembly input mode
-                            let parsed_program = program(CompleteStr(buffer));
-                            if parsed_program.is_ok() {
-                                let (_, result) = parsed_program.unwrap();
-                                let bytecode = result.to_bytes();
-                                for byte in bytecode {
-                                    self.vm.add_byte(byte);
+                            match program(buffer.into()) {
+                                Ok((_, program)) => {
+                                    self.vm.append_bytes(program.to_bytes());
+                                    self.vm.run_once();
                                 }
-                                self.vm.run_once();
-                            } else {
-                                println!("Unable to parse input. Please check your syntax.");
-                                REPL::print_help();
-                            }
+                                Err(_) => {
+                                    println!("Unable to parse input. Please check your syntax.");
+                                    REPL::print_help();
+                                }
+                            };
                         }
                     }
                 }

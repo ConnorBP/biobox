@@ -242,6 +242,10 @@ impl VM {
     pub fn add_byte(&mut self, byte: u8) {
         self.program.push(byte);
     }
+
+    pub fn append_bytes(&mut self, mut bytes: Vec<u8>) {
+        self.program.append(&mut bytes);
+    }
 }
 
 #[cfg(test)]
