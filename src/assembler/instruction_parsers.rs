@@ -36,23 +36,32 @@ impl AssemblerInstruction {
             }
         }
 
+        //pad any empty space out of the total 32 bits with 0
+        while results.len() < 4 {
+            results.push(0);
+        }
+
         results
     }
 
     fn extract_operand(t: &Token, results: &mut Vec<u8>) {
         match t {
+            //Add a register token to the results if found
             Token::Register { reg_num } => {
                 results.push(*reg_num);
             }
+            //Add an integer token to the results if found
             Token::IntegerOperand { value } => {
                 let converted = *value as u16;
                 let byte1 = converted;
                 let byte2 = converted >> 8;
                 //bytes are placed in the vector in little-endian order
+                //required to store as u16 (integers take up 16 bits of an instructions 32) for larger numbers
                 results.push(byte2 as u8);
                 results.push(byte1 as u8);
             }
             _ => {
+                //opcodes (load, jmp, add, etc..) should not be in an operand field (after another opcode)
                 println!("Opcode found in operand field");
                 std::process::exit(1);
             }
