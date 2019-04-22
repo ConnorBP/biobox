@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 termcolor = "1.0.4"
+nom = "4.2.3"

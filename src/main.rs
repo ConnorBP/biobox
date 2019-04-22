@@ -10,6 +10,12 @@
 // features for obfuscating the binary with either built in or provided xor or similar functions should be worked in somehow (for protecting proprietary tech)
 // optomizations on the engine to make sure primative math and binary functions run as close to the metal as they can would also be nice
 
+#[macro_use]
+extern crate nom;
+
+//import the assembler
+pub mod assembler;
+
 //import the modules
 pub mod instructions;
 //vm after instructions because it uses instructions in the vm :)
