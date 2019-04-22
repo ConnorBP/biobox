@@ -6,6 +6,7 @@ use std;
 use std::io;
 use std::io::Write;
 use std::num::ParseIntError;
+use std::result::Result::Err;
 
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
@@ -35,6 +36,11 @@ impl REPL {
         Enter an instruction to execute directly on the vm
         Example for a LOAD instruction: load $0 #100
         Example for add (add register 3 to register 1 and store in register 4): add $1 $3 $4
+
+        Optionally:
+        Enter in a Hex String (prefixed by 0x) to execute opcodes directly on the vm
+        Example for a LOAD command: 0x01 01 03 E8
+        Example for add (add register 3 to register 1 and store in register 4): 0x02 01 03 04
 
     Commands:
 
@@ -131,34 +137,43 @@ impl REPL {
                     std::process::exit(0); //ends the process right away
                                            //break;//break out of the execution loop to reach the natural end of the process
                 }
-                _ => {
-                    let parsed_program = program(CompleteStr(buffer));
-                    if parsed_program.is_ok() {
-                        let (_, result) = parsed_program.unwrap();
-                        let bytecode = result.to_bytes();
-                        for byte in bytecode {
-                            self.vm.add_byte(byte);
+                line => {
+                    match &line[..2] {
+                        "0x" => {
+                            //hex input mode
+                            let results = match REPL::remove_first2(buffer) {
+                                Some(value) => Some(self.parse_hex(value)),
+                                None => None,
+                            };
+                            match results {
+                                Some(Ok(bytes)) => {
+                                    for byte in bytes {
+                                        self.vm.add_byte(byte);
+                                    }
+                                    self.vm.run_once();
+                                }
+                                Some(Err(_)) | None => {
+                                    println!("Unable to decode hex string. Please enter 4 groups (separated by spaces) of 2 hex characters each.");
+                                    REPL::print_help();
+                                }
+                            }
                         }
-                        self.vm.run_once();
-                    } else {
-                        println!("Unable to parse input. Please check your syntax.");
-                        REPL::print_help();
+                        _ => {
+                            //assume assembly input mode
+                            let parsed_program = program(CompleteStr(buffer));
+                            if parsed_program.is_ok() {
+                                let (_, result) = parsed_program.unwrap();
+                                let bytecode = result.to_bytes();
+                                for byte in bytecode {
+                                    self.vm.add_byte(byte);
+                                }
+                                self.vm.run_once();
+                            } else {
+                                println!("Unable to parse input. Please check your syntax.");
+                                REPL::print_help();
+                            }
+                        }
                     }
-
-                    // old raw bytecode version:
-                    // let results = self.parse_hex(buffer);
-                    // match results {
-                    //     Ok(bytes) => {
-                    //         for byte in bytes {
-                    //             self.vm.add_byte(byte);
-                    //         }
-                    //         self.vm.run_once();
-                    //     }
-                    //     Err(_e) => {
-                    //         println!("Unable to decode hex string. Please enter 4 groups (separated by spaces) of 2 hex characters each.");
-                    //         REPL::print_help();
-                    //     }
-                    // }
                 }
             }
         }
@@ -183,5 +198,9 @@ impl REPL {
             }
         }
         Ok(results)
+    }
+
+    fn remove_first2(s: &str) -> Option<&str> {
+        s.chars().next().map(|c| &s[c.len_utf8() * 2..])
     }
 }
