@@ -4,7 +4,7 @@ use nom::types::CompleteStr;
 
 named!(pub opcode_load<CompleteStr, Token>,
     do_parse!(
-        tag!("load") >> (Token::Op{code: Opcode::LOAD})
+        tag_no_case!("load") >> (Token::Op{code: Opcode::LOAD})
     )
 );
 
@@ -20,6 +20,10 @@ mod tests {
         let (rest, token) = result.unwrap();
         assert_eq!(token, Token::Op { code: Opcode::LOAD });
         assert_eq!(rest, CompleteStr(""));
+
+        //assert that it is indeed casae insensitive
+        let result = opcode_load(CompleteStr("LOAD"));
+        assert_eq!(result.is_ok(), true);
 
         //tests that an invalid opcode isn't recognized
         let result = opcode_load(CompleteStr("aold"));
