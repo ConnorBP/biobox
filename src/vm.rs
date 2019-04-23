@@ -60,10 +60,9 @@ impl VM {
                 return false; //cancels out of loop to halt running
             }
             Opcode::NOP => {
-                //do nothing
-                //advance to next instruction for the next loop
-                self.next_16_bits();
-                self.next_8_bits();
+                //do nothing and advance to next instruction for the next loop
+                //move up 3 bytes (24 bits)
+                self.pc += 3;
             }
             Opcode::LOAD => {
                 let register = self.next_8_bits() as usize; // cast to usize to use as index in the array

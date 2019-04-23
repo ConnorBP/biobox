@@ -140,7 +140,9 @@ impl REPL {
                     println!("End of registers listing.");
                 }
                 ".loadfile" => match REPL::get_file_path_prompt(&mut stdin) {
-                    Ok(filepath) => if self.load_program_filepath(filepath) {},
+                    Ok(filepath) => if self.load_program_filepath(filepath) {
+                        println!("Loaded program successfully!");
+                    },
                     Err(_e) => {
                         println!("Error getting input: {}", _e);
                     }
