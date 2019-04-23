@@ -266,16 +266,26 @@ impl VM {
         self.program.to_vec()
     }
 
+    pub fn clear_program(&mut self) {
+        //clear the entire program memory
+        self.program.clear();
+    }
+
     pub fn get_registers(&mut self) -> [i32; 32] {
         //return the data in the VM registers
         self.registers
+    }
+
+    pub fn clear_registers(&mut self) {
+        //clears out the register memory (resets all back to 0)
+        self.registers = [0; 32];
     }
 
     pub fn add_byte(&mut self, byte: u8) {
         self.program.push(byte);
     }
 
-    pub fn append_bytes(&mut self, mut bytes: Vec<u8>) {
+    pub fn append_program_bytes(&mut self, mut bytes: Vec<u8>) {
         self.program.append(&mut bytes);
     }
 }
