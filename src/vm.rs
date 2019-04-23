@@ -34,7 +34,7 @@ impl VM {
 
     /// Loops as long as instructions can be executed
     pub fn run(&mut self) {
-        let mut dorun = false;
+        let mut dorun = true;
         while dorun {
             dorun = self.execute_instruction();
         }
