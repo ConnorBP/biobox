@@ -8,35 +8,48 @@ use std::slice::Iter;
 //opcodes
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Opcode {
-    HLT,
-    LOAD,
-    ADD,
-    SUB,
-    MUL,
-    DIV,
-    JMP,
-    JMPF,
-    JMPB,
-    EQ,
-    NEQ,
-    GT,
-    LT,
-    GTEQ,
-    LTEQ,
-    BETW,
-    JEQ,
-    NOP,
-    ALOC,
-    INC,
-    DEC,
-    IGL,
+    //system
+    LOAD = 1,
+    ALOC = 18,
+
+    //math
+    ADD = 2,
+    SUB = 3,
+    INC = 19,
+    DEC = 20,
+    MUL = 4,
+    DIV = 5,
+
+    //comparison
+    EQ = 9,
+    NEQ = 10,
+    GT = 11,
+    LT = 12,
+    GTEQ = 13,
+    LTEQ = 14,
+    BETW = 15,
+
+    //jumps
+    JMP = 6,
+    JMPF = 7,
+    JMPB = 8,
+    JEQ = 16,
+
+    //defaults
+    HLT = 0,
+    NOP = 17,
+    IGL = 254,
 }
 
 impl Opcode {
     pub fn iterator() -> Iter<'static, Opcode> {
         static OPCODES: [Opcode; 22] = [
-            HLT, LOAD, ADD, SUB, MUL, DIV, JMP, JMPF, JMPB, EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, JEQ,
-            NOP, ALOC, INC, DEC, IGL,
+            //system
+            LOAD, ALOC, //math
+            ADD, SUB, INC, DEC, MUL, DIV, //comparison
+            EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, //jumps
+            JMP, JMPF, JMPB, JEQ, //defaults
+            HLT, NOP, IGL,
         ];
         OPCODES.iter()
     }
