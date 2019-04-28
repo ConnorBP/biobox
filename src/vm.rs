@@ -115,6 +115,7 @@ impl VM {
                 //relative jump opcodes (from current position) jump back
                 let target = self.registers[self.next_8_bits() as usize];
                 let result = self.pc.overflowing_sub(target as usize);
+                //second item in the tuple is a bool of wether or not the program overflowed
                 if result.1 {
                     //panic!("PROGRAM COUNTER OVERFLOWED! (JMPB went below 0)");
                     //panic if program counter overflows. (It should never overflow) and print debug info

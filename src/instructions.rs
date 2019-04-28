@@ -8,6 +8,28 @@ use std::slice::Iter;
 //opcodes
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Opcode {
+
+    /* 0 - 15 similar opcodes to the LC-3 16 bit instruction set but in 32-bit*/
+
+    //     OP_BR = 0, /* branch */
+    //     OP_ADD,    /* add 0001 DR(3) SR1(3) 0(1) 00(2) sr2(3) (total 16 bytes width)*/
+    //     OP_LD,     /* load */
+    //     OP_ST,     /* store */
+    //     OP_JSR,    /* jump register */
+    //     OP_AND,    /* bitwise and */
+    //     OP_LDR,    /* load register */
+    //     OP_STR,    /* store register */
+    //     OP_RTI,    /* unused */
+    //     OP_NOT,    /* bitwise not */
+    //     OP_LDI,    /* load indirect */
+    //     OP_STI,    /* store indirect */
+    //     OP_JMP,    /* jump */
+    //     OP_RES,    /* reserved (unused) */
+    //     OP_LEA,    /* load effective address */
+    //     OP_TRAP    /* execute trap */
+
+    /* 16 - 31 additional max-16 base system opcodes*/
+
     //system
     LOAD = 1,
     ALOC = 18,
@@ -38,18 +60,57 @@ pub enum Opcode {
     //defaults
     HLT = 0,
     NOP = 17,
-    IGL = 254,
+
+
+
+    /* 50 - 99 special math operators */
+
+
+    /* 100 to 199 */
+
+
+
+
+    /* 200 - 249 */
+
+    
+    /* 250 - 254 special sys codes */
+
+
+
+    // (255 reserved for IGL illegal op) illegal operator
+    IGL = 254, //max is actually 255 (256 total values) 🤦‍
 }
+
+// LC-3 opcode definitions
+// enum
+// {
+//     OP_BR = 0, /* branch */
+//     OP_ADD,    /* add 0001 DR(3) SR1(3) 0(1) 00(2) sr2(3) (total 16 bytes width)*/
+//     OP_LD,     /* load */
+//     OP_ST,     /* store */
+//     OP_JSR,    /* jump register */
+//     OP_AND,    /* bitwise and */
+//     OP_LDR,    /* load register */
+//     OP_STR,    /* store register */
+//     OP_RTI,    /* unused */
+//     OP_NOT,    /* bitwise not */
+//     OP_LDI,    /* load indirect */
+//     OP_STI,    /* store indirect */
+//     OP_JMP,    /* jump */
+//     OP_RES,    /* reserved (unused) */
+//     OP_LEA,    /* load effective address */
+//     OP_TRAP    /* execute trap */
+// };
 
 impl Opcode {
     pub fn iterator() -> Iter<'static, Opcode> {
         static OPCODES: [Opcode; 22] = [
-            //system
-            LOAD, ALOC, //math
-            ADD, SUB, INC, DEC, MUL, DIV, //comparison
-            EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, //jumps
-            JMP, JMPF, JMPB, JEQ, //defaults
-            HLT, NOP, IGL,
+            LOAD, ALOC, //system
+            ADD, SUB, INC, DEC, MUL, DIV, //math
+            EQ, NEQ, GT, LT, GTEQ, LTEQ, BETW, //comparison
+            JMP, JMPF, JMPB, JEQ, //jumps
+            HLT, NOP, IGL, //defaults
         ];
         OPCODES.iter()
     }

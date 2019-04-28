@@ -17,3 +17,23 @@ pub enum Token {
     LabelUsage { name: String },
     Directive { name: String },
 }
+
+// #[derive(Debug)]
+// pub struct Assembler {
+//     phase: AssemblerPhase,
+// }
+
+// #[derive(Debug)]
+// pub struct Assembler {
+//     pub phase: AssemblerPhase,
+//     pub symbols: SymbolTable,
+// }
+
+// impl Assembler {
+//     pub fn new() -> Assembler {
+//         Assembler {
+//             phase: AssemblerPhase::First(),
+//             symbols: SymbolTable::new()
+//         }
+//     }
+// }
